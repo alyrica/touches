@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha index.js",
-    "start": "nodemon index.js"
+    "start": "nodemon server.js | ./node_modules/.bin/bunyan"
   },
   "repository": {
     "type": "git",
