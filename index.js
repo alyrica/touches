@@ -3,21 +3,7 @@ var express=require("express");
 var app=new express();
 var Promise=require("bluebird");
 var body_parser=require("body-parser");
-var bunyan=require("bunyan");
-var bsyslog=require("bunyan-syslog");
-var log=bunyan.createLogger(
-	{"name":"wiz",
-	    streams: [ {
-	        level: 'debug',
-	        type: 'raw',
-	        stream: bsyslog.createBunyanStream({
-	            type: 'sys',
-	            facility: bsyslog.daemon,
-	            host: 'localhost',
-	            port: 514
-	        })}
-   		]
-	});
+var log=require("bunyan").createLogger({"name":"wiz"});
 var mysql=require("mysql");
 //Promise.promisifyAll(mysql);
 
