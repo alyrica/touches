@@ -27,7 +27,8 @@
 					<label for="address">Address</label>
 					<div class="form-inline">
 						<button type="button" class="btn btn-default" id="locate">Locate</button>
-
+						<button type="button" class="btn btn-default" id="manual">Manual</button>
+						<button type="button" class="btn btn-default" id="add">Add</button>
 					</div>
 					<div id="geolocation_ids" />
 				</div>
@@ -156,6 +157,8 @@
 			 			if(data.status=="success") {
 
 							$("button[type=submit]").text("Touched").addClass("disabled");
+							$("input[name=geolocation_id]:checked").parent().parent().addClass("text-danger");
+							$("#notes").val("");
 			 			} else {
 
 			 				alert("Error touching - database says: "+data.message);

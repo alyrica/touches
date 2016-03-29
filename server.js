@@ -64,6 +64,7 @@ app.get("/employees/",function(req, res){
 
 app.post("/touches",function(req, res){
 
+	
 	if(!req.body.geolocation_id || req.body.geolocation_id==0 || !req.body.customer_id || req.body.customer_id==0) {
 
 		res.json({"error" : "Missing required parameter"});
@@ -72,18 +73,32 @@ app.post("/touches",function(req, res){
 
 	var conn=mysql.createConnection(config.mysql);
 	conn.connect();
-	conn.query("INSERT INTO `touches` ( geolocation_id, customer_id, timestamp, notes ) VALUES ( ?,?, NOW(), ? )", [parseInt(req.body.geolocation_id), parseInt(req.body.customer_id), req.body.notes], function(err, rows, fields){
-
-		if(err){
+	conn.query("SELECT id FROM touches WHERE customer_id=? AND geolocation_id=? AND timestamp>DATE_SUB(CURDATE(),INTERVAL 7 DAY)",[parseInt(req.body.customer_id),parseInt(req.body.geolocation_id)], function(err, rows, fields) {
+		if(err) {
 			log.error(err.message);
 			res.json({"status" : "error", "message" : err.code});
-
 		} else {
+			if(rows.length > 0) {
+				res.json({"status" : "error", "message" : "You already touched this location"});
 
-			res.json({"status": "success", "data" : null });
+			} else {
+				conn.query("INSERT INTO `touches` ( geolocation_id, customer_id, timestamp, notes ) VALUES ( ?,?, NOW(), ? )", [parseInt(req.body.geolocation_id), parseInt(req.body.customer_id), req.body.notes], function(err, rows, fields){
+
+					if(err){
+						log.error(err.message);
+						res.json({"status" : "error", "message" : err.code});
+
+					} else {
+
+						res.json({"status": "success", "data" : null });
+					}
+
+				});
+			}
 		}
-
 	});
+
+
 
 });
 
