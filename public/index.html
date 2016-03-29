@@ -85,22 +85,37 @@
 
 							if(data.status=="success") {
 
-
+								var checked = false;
+								var checked_string=" checked=\"checked\" ";
 								$("label[for=address]").text("Address (near "+lat+", "+lon+")");
 								$.each(data.data, function(i,o){
 									var cust_class = "";
 									var touch_class = "";
+									var checked_class = checked_string;
+									var disabled_class = "";
 									if(o.cur_customer) {
-										cust_class=" disabled ";
+										disabled_class = " disabled ";
+										cust_class=" text-success ";
+										// Don't set the checked attr if this option is dissabled.
+										checked_class="";
 									}
 									if(o.has_touch) {
 										touch_class=" text-danger ";
 									}
-									$("#geolocation_ids").append("<div class=\"radio "+touch_class+"\"><label><input type=\"radio\" name=\"geolocation_id\"  value=\""+o.id+"\""+cust_class+">"+o.address+"</label></div>");
+									// If we added the check attr to a previous option, don't check this one
+									if(checked) {
+										checked_class="";
+									}
+									$("#geolocation_ids").append("<div class=\"radio "+touch_class + cust_class+"\"><label><input type=\"radio\" name=\"geolocation_id\"  value=\""+o.id+"\""+disabled_class + checked_class+">"+o.address+"</label></div>");
+
+									// IF we added the checked attr to this option, set checked to true
+									if(checked_class.length > 0) {
+										checked = true;
+									}
 								});
 
 								// Check 1st one
-								$("input[name=geolocation_id]:first").attr("checked","checked");
+								//$("input[name=geolocation_id]:first").attr("checked","checked");
 
 								// Enable the submit button
 								$("button[type=submit]").text("Touch").removeClass("disabled");
