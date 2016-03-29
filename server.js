@@ -10,11 +10,11 @@ var mysql=require("mysql");
 
 
 // Serve static files from the public folder.  Default is index.html
-app.use(express.static("public"));	
+app.use(express.static("public"));
 app.use(body_parser.urlencoded({"extend" : true })); // For parsing x-www-form-urlencoded
 app.get("/",function(req, res){
 
-	res.sendfile("public/index.html")
+	res.sendfile("public/index.html");
 });
 
 app.get("/geolocations/",function(req, res){
@@ -30,8 +30,8 @@ app.get("/geolocations/",function(req, res){
 	var conn=mysql.createConnection(config.mysql);
 	conn.connect();
 	// Thanks http://tumblr.jonthornton.com/post/1419487206/calculate-latitude-longitude-distances-in-mysql-with
-	conn.query("SELECT id, CONCAT_WS( ' ', street, city ) AS address, ROUND(3978 * acos(sin(?) * sin( RADIANS( y_coord ) ) + cos(?) * cos( RADIANS( y_coord ) ) * cos(? - RADIANS( x_coord ) )),2 ) AS distance from gis_addresses ORDER BY distance LIMIT 5", [lat, lat, lon], function(err, rows, fields){
-
+	//conn.query("SELECT id, CONCAT_WS( ' ', street, city ) AS address, ROUND(3978 * acos(sin(?) * sin( RADIANS( y_coord ) ) + cos(?) * cos( RADIANS( y_coord ) ) * cos(? - RADIANS( x_coord ) )),2 ) AS distance from gis_addresses ORDER BY distance LIMIT 5", [lat, lat, lon], function(err, rows, fields){
+	conn.query("SELECT gis.id, gis.address, gis.distance, if(ips.geolocation_id IS NULL AND cc.geolocation_id IS NULL, false, true) as cur_customer, if(t.geolocation_id IS NULL, false, true) as has_touch	FROM (SELECT id, CONCAT_WS( ' ', street, city ) AS address, ROUND(3978 * acos(sin(?) * sin( RADIANS( y_coord ) ) + cos(?) * cos( RADIANS( y_coord ) ) * cos(? - RADIANS( x_coord ) )),2 ) AS distance FROM gis_addresses ORDER BY distance LIMIT 5) gis LEFT JOIN v2_ips ips ON gis.id=ips.geolocation_id LEFT JOIN (SELECT geolocation_id FROM customers c INNER JOIN v2_connections conn ON c.id=conn.customer_id) cc ON gis.id=cc.geolocation_id LEFT JOIN (SELECT geolocation_id FROM touches WHERE timestamp > DATE_SUB(CURDATE(), INTERVAL 60 DAY)) t ON gis.id=t.geolocation_id",[lat,lat,lon],function(err, rows, fields){
 		if(err){
 			log.error(err.message);
 			res.json({"status" : "error", "message" : err.code});
@@ -45,7 +45,20 @@ app.get("/geolocations/",function(req, res){
 
 });
 
+app.get("/employees/",function(req, res){
+	var conn=mysql.createConnection(config.mysql);
+	conn.connect();
+	conn.query("SELECT c.id, CONCAT_WS( ' ', c.firstname, c.lastname) AS fullname FROM customers c, v2_permissions p WHERE p.customer_id=c.id AND ( p.permission='login' OR p.permission='superuser' ) AND c.timeclock_display='yes' ORDER BY fullname", function(err, rows, fields) {
 
+		if(err) {
+			log.error(err.message);
+			res.json({"status" : "error", "message" : err.code});
+		} else {
+			res.json({"status" : "success", "data" : rows });
+		}
+
+	});
+});
 
 
 

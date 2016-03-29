@@ -19,10 +19,7 @@
 				<div class="form-group">
 					<label for="customer_id">Me</label>
 					<select class="form-control" id="customer_id">
-						<option value="1">Gregg, Mike</option>
-						<option value="11477">Sullivan, Charlie</option>
-						<option value="77">Sullivan, Kevin</option>
-						<option value="14717">Winkler, Chris</option>
+
 					</select>
 				</div>
 
@@ -48,6 +45,23 @@
 		<script language="JavaScript">
 		$(document).ready(function(){
 
+			// Load Employee names in the list
+			$.getJSON("/employees", function(data){
+
+				if(data.status=="success") {
+
+
+					$.each(data.data, function(i,o){
+
+						$("#customer_id").append("<option value=\""+o.id+"\">"+o.fullname+"</option>");
+					});
+
+
+				} else {
+
+					alert("Database says: "+data.message);
+				}
+			});
 
 			// Wire up locate button
 			$("#locate").click(function(){
@@ -74,11 +88,18 @@
 
 								$("label[for=address]").text("Address (near "+lat+", "+lon+")");
 								$.each(data.data, function(i,o){
-
-									$("#geolocation_ids").append("<div class=\"radio\"><label><input type=\"radio\" name=\"geolocation_id\"  value=\""+o.id+"\">"+o.address+"</label></div>");
+									var cust_class = "";
+									var touch_class = "";
+									if(o.cur_customer) {
+										cust_class=" disabled ";
+									}
+									if(o.has_touch) {
+										touch_class=" text-danger ";
+									}
+									$("#geolocation_ids").append("<div class=\"radio "+touch_class+"\"><label><input type=\"radio\" name=\"geolocation_id\"  value=\""+o.id+"\""+cust_class+">"+o.address+"</label></div>");
 								});
 
-								// Check 1st one 
+								// Check 1st one
 								$("input[name=geolocation_id]:first").attr("checked","checked");
 
 								// Enable the submit button
@@ -109,8 +130,8 @@
 				}
 
 				$("button[type=submit]").text("...").addClass("disabled");
-				$.post("/touches", 
-					{ 
+				$.post("/touches",
+					{
 						"geolocation_id":	$("input[name=geolocation_id]:checked").val(),
 						"customer_id"	:	$("#customer_id").val(),
 						"notes"			:	$("#notes").val()
