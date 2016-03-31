@@ -60,11 +60,24 @@ app.get("/employees/",function(req, res){
 	});
 });
 
-
+app.get("/addresses/", function(req, res) {
+	var addr_str = req.query.address;
+	var conn=mysql.createConnection(config.mysql);
+	conn.connect();
+	conn.query("SELECT DISTINCT gis.id, gis.address, if(ips.geolocation_id IS NULL AND cc.geolocation_id IS NULL, false, true) as cur_customer, if(t.geolocation_id IS NULL, false, true) as has_touch FROM (SELECT id, CONCAT_WS( ' ', street, city ) AS address FROM gis_addresses WHERE street LIKE '"+addr_str+"%' ORDER BY address LIMIT 5) gis LEFT JOIN v2_ips ips ON gis.id=ips.geolocation_id LEFT JOIN (SELECT DISTINCT geolocation_id FROM customers c INNER JOIN v2_connections conn ON c.id=conn.customer_id) cc ON gis.id=cc.geolocation_id LEFT JOIN (SELECT DISTINCT geolocation_id FROM touches WHERE timestamp > DATE_SUB(CURDATE(), INTERVAL 60 DAY)) t ON gis.id=t.geolocation_id",function(err,rows,fields) {
+	//conn.query("SELECT g.id, CONCAT_WS( ' ', g.street, g.city, g.zip ) as address, g.x_coord, g.y_coord from gis_addresses g WHERE g.street LIKE '"+addr_str+"%' LIMIT 5",function(err, rows, fields){
+		if(err) {
+			log.error(err.message);
+			res.json({"status" : "error", "message" : err.code});
+		} else {
+			res.json({"status" : "success", "data" : rows });
+		}
+	});
+});
 
 app.post("/touches",function(req, res){
 
-	
+
 	if(!req.body.geolocation_id || req.body.geolocation_id==0 || !req.body.customer_id || req.body.customer_id==0) {
 
 		res.json({"error" : "Missing required parameter"});
@@ -101,9 +114,6 @@ app.post("/touches",function(req, res){
 
 
 });
-
-
-
 
 
 var server=app.listen(process.env.PORT || 8080, function (){
