@@ -79,7 +79,7 @@
 
 				if(data.status=="success") {
 
-
+					$("#customer_id").append("<option value=\"0\">Select Your Name</option>");
 					$.each(data.data, function(i,o){
 
 						$("#customer_id").append("<option value=\""+o.id+"\">"+o.fullname+"</option>");
@@ -223,13 +223,13 @@
 						// classes added by the easy-autocomplete functionality.
 						if(parseInt($("#m_address").getSelectedItemData().cur_customer)) {
 							$("#m_address").removeProp("style").prop("style","color: #3c763d");
-							$("button[type=submit]").prop("disabled","disabled");
+							$("button[type=submit]").prop("disabled","disabled").text("Nope");
 						} else if (parseInt($("#m_address").getSelectedItemData().has_touch)) {
 							$("#m_address").removeProp("style").prop("style","color: #a94442");
-							$("button[type=submit]").removeProp("disabled");
+							$("button[type=submit]").removeProp("disabled").text("Touch");
 						} else {
 							$("#m_address").removeProp("style");
-							$("button[type=submit]").removeProp("disabled");
+							$("button[type=submit]").removeProp("disabled").text("Touch");
 						}
 					}
 				},
@@ -321,6 +321,10 @@
 					}
 				} else if($("#add_entry").is(":visible")) {
 					alert("This function is not yet enabled");
+					return false;
+				}
+				if ($("#customer_id").val()==0) {
+					alert("Who are you?  Please select your name.");
 					return false;
 				}
 
