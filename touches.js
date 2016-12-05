@@ -11,7 +11,7 @@ var mysql=require("mysql");
 
 // Serve static files from the public folder.  Default is index.html
 app.use(express.static("public"));
-app.use(body_parser.urlencoded({"extend" : true })); // For parsing x-www-form-urlencoded
+app.use(body_parser.urlencoded({"extended" : true })); // For parsing x-www-form-urlencoded
 app.get("/",function(req, res){
 
 	res.sendfile("public/index.html");
