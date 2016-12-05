@@ -1,0 +1,29 @@
+# This is a systemd service file.
+# It's used to start servers at boot and also restart them if they fail.
+# For documentation on config file syntax see:
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html
+#
+# To install a service file run:
+# cp example.service /etc/systemd/system/
+# systemctl enable example
+#
+# To start immediately after installing (without waiting for reboot) run:
+# systemctl start example
+#
+# Other relevant systemctl verbs are stop, disable, and status.
+# Output from your server will go into the main system log file,
+# which you can see with commands like:
+# journalctl -f
+# journalctl -n 1000 | less
+
+[Unit]
+Description=Touches
+
+[Service]
+User=root
+ExecStart=/usr/bin/nodejs /root/touches/touches.js
+Restart=on-failure
+WorkingDirectory=/root/touches
+
+[Install]
+WantedBy=multi-user.target

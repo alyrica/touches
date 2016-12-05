@@ -1,0 +1,14 @@
+{
+
+	"mysql" : {
+
+		"host"			:	"mysql.alyrica.net",
+		"user"			:	"touches",
+		"password"		:	"hng6jdBhrne%",
+		"database"		:	"alyrica",
+		"insecureAuth"	:	true
+
+	}
+
+
+}
